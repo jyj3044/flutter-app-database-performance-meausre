@@ -21,6 +21,7 @@ class _HivePageState extends State<HivePage> {
   int insertTime = -1;
   int findAllTime = -1;
   int findByIdTime = -1;
+  int findByValueTime = -1;
   int updateTime = -1;
   int updateListTime = -1;
   int deleteAllTime = -1;
@@ -54,6 +55,7 @@ class _HivePageState extends State<HivePage> {
             getTextWidget("INSERT TIME: ", "${insertTime}ms", insertTime),
             getTextWidget("FIND ALL TIME: ", "${findAllTime}ms", findAllTime),
             getTextWidget("FIND BY ID TIME: ", "${findByIdTime}ms", findByIdTime),
+            getTextWidget("FIND BY VALUE TIME: ", "${findByValueTime}ms", findByValueTime),
             getTextWidget("UPDATE TIME: ", "${updateTime}ms", updateTime),
             getTextWidget("UPDATE LIST TIME: ", "${updateListTime}ms", updateListTime),
             getTextWidget("DELETE ALL TIME: ", "${deleteAllTime}ms", deleteAllTime),
@@ -111,8 +113,6 @@ class _HivePageState extends State<HivePage> {
     var box = await Hive.openBox<HivePerson>(_boxName);
     box.clear();
 
-    // box.deleteFromDisk();
-
     /// 데이터 넣기
     await insertData(box);
 
@@ -121,6 +121,9 @@ class _HivePageState extends State<HivePage> {
 
     /// 데이터 한개찾기
     final data = await findByIdData(box);
+
+    /// 조건이 일치하는 데이터 찾기.
+    await findByValueData(box);
 
     /// 데이터 한개 수정하기
     await updateData(box, data!);
@@ -199,6 +202,28 @@ class _HivePageState extends State<HivePage> {
     return data;
   }
 
+  Future<List<HivePerson>> findByValueData(Box<HivePerson> box) async {
+    if (!mounted) return [];
+
+    setState(() {
+      print("$_title 조건데이터 찾기 시작");
+      statusMessage = "조건데이터 찾는중...";
+    });
+
+    final stopwatch = Stopwatch()..start();
+    final filterData = box.values.where((element) => element.isFemale).toList();
+    filterData.sort((a, b) => a.id.compareTo(b.id));
+
+    if (!mounted) return [];
+
+    setState(() {
+      findByValueTime = stopwatch.elapsed.inMilliseconds;
+      print("$_title 조건데이터 가져오기 완료. ${filterData.length}");
+    });
+
+    return filterData;
+  }
+
   updateData(Box<HivePerson> box, HivePerson data) async {
     if (!mounted) return;
 
@@ -208,13 +233,15 @@ class _HivePageState extends State<HivePage> {
     });
 
     final stopwatch = Stopwatch()..start();
-    HivePerson copyHivePerson = data.copyHivePerson(nickName: "닉네임 수정");
-    box.putAt(testDataList.length ~/ 2, copyHivePerson);
+    // HivePerson copyHivePerson = data.copyHivePerson(nickName: "닉네임 수정");
+    data.nickName = "닉네임 수정";
+    data.save();
+    // box.putAt(testDataList.length ~/ 2, copyHivePerson);
     if (!mounted) return;
 
     setState(() {
       updateTime = stopwatch.elapsed.inMilliseconds;
-      print("$_title 데이터 수정 완료. ${copyHivePerson.toString()}");
+      print("$_title 데이터 수정 완료. ${data.toString()}");
     });
   }
 

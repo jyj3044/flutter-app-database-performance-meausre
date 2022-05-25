@@ -4,35 +4,35 @@ import 'package:hive/hive.dart';
 part 'hive_person.g.dart';
 
 @HiveType(typeId: 1)
-class HivePerson {
+class HivePerson extends HiveObject {
   @HiveField(0)
-  final int id;
+  int id;
   @HiveField(1)
-  final int age;
+  int age;
   @HiveField(2)
-  final int salary;
+  int salary;
   @HiveField(3)
-  final bool isFemale;
+  bool isFemale;
   @HiveField(4)
-  final bool maritalStatus;
+  bool maritalStatus;
   @HiveField(5)
-  final String name;
+  String name;
   @HiveField(6)
-  final String nickName;
+  String nickName;
   @HiveField(7)
-  final String job;
+  String job;
   @HiveField(8)
-  final String nationality;
+  String nationality;
   @HiveField(9)
-  final String testField1;
+  String testField1;
   @HiveField(10)
-  final String testField2;
+  String testField2;
   @HiveField(11)
-  final String testField3;
+  String testField3;
   @HiveField(12)
-  final String testField4;
+  String testField4;
   @HiveField(13)
-  final String testField5;
+  String testField5;
 
   HivePerson(
     this.id, {
@@ -50,39 +50,6 @@ class HivePerson {
     this.testField4 = "",
     this.testField5 = "",
   });
-
-  HivePerson copyHivePerson({
-    age,
-    salary,
-    isFemale,
-    maritalStatus,
-    name,
-    nickName,
-    job,
-    nationality,
-    testField1,
-    testField2,
-    testField3,
-    testField4,
-    testField5,
-  }) {
-    return HivePerson(
-      id,
-      age: age ?? this.age,
-      salary: salary ?? this.salary,
-      isFemale: isFemale ?? this.isFemale,
-      maritalStatus: maritalStatus ?? this.maritalStatus,
-      name: name ?? this.name,
-      nickName: nickName ?? this.nickName,
-      job: job ?? this.job,
-      nationality: nationality ?? this.nationality,
-      testField1: testField1 ?? this.testField1,
-      testField2: testField2 ?? this.testField2,
-      testField3: testField3 ?? this.testField3,
-      testField4: testField4 ?? this.testField4,
-      testField5: testField5 ?? this.testField5,
-    );
-  }
 
   @override
   String toString() {

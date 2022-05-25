@@ -201,6 +201,7 @@ class _FloorPageState extends State<FloorPage> {
     });
 
     final stopwatch = Stopwatch()..start();
+    data.nickName = "닉네임 수정";
     await personDao.updateData(data);
     if (!mounted) return;
 

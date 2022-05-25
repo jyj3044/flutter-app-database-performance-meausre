@@ -4,20 +4,20 @@ import 'package:floor/floor.dart';
 @entity
 class FloorPerson {
   @primaryKey
-  final int id;
-  final int age;
-  final int salary;
-  final bool isFemale;
-  final bool maritalStatus;
-  final String name;
-  final String nickName;
-  final String job;
-  final String nationality;
-  final String testField1;
-  final String testField2;
-  final String testField3;
-  final String testField4;
-  final String testField5;
+  int id;
+  int age;
+  int salary;
+  bool isFemale;
+  bool maritalStatus;
+  String name;
+  String nickName;
+  String job;
+  String nationality;
+  String testField1;
+  String testField2;
+  String testField3;
+  String testField4;
+  String testField5;
 
   FloorPerson(
     this.id, {

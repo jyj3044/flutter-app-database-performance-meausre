@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:database_performance_measure/entity/person.dart';
 import 'package:database_performance_measure/floor/floor_page.dart';
 import 'package:database_performance_measure/hive/hive_page.dart';
