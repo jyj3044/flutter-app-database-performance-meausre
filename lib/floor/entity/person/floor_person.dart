@@ -35,6 +35,11 @@ class FloorPerson {
     this.testField4 = "",
     this.testField5 = "",
   });
+
+  @override
+  String toString() {
+    return 'FloorPerson{id: $id, age: $age, salary: $salary, isFemale: $isFemale, maritalStatus: $maritalStatus, name: $name, nickName: $nickName, job: $job, nationality: $nationality, testField1: $testField1, testField2: $testField2, testField3: $testField3, testField4: $testField4, testField5: $testField5}';
+  }
 }
 
 FloorPerson makeFloorPerson(Person person) {
@@ -54,4 +59,5 @@ FloorPerson makeFloorPerson(Person person) {
     testField4: person.testField4,
     testField5: person.testField5,
   );
+
 }

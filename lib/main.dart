@@ -1,6 +1,7 @@
 import 'package:database_performance_measure/entity/person.dart';
 import 'package:database_performance_measure/floor/floor_page.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -41,7 +42,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    initDatabase();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initDatabase();
+    });
   }
 
   @override
@@ -104,15 +107,26 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   initDatabase() async {
-    message = "테스트용 데이터를 설정중입니다.";
+    setState(() {
+      message = "테스트용 데이터를 설정중입니다.";
+    });
+    print("데이터 설정중..");
 
-    int testDataCount = 100000;
+    final list = await compute(makeData, 10000);
+    testDataList.addAll(list);
 
+    setState(() {
+      message = "테스트용 데이터를 설정완료.";
+    });
+    print("데이터 설정완료");
+  }
+
+  static makeData(int testDataCount) {
+    final List<Person> list = [];
     for (int i = 1; i <= testDataCount; i++) {
-      testDataList.add(makePerson(i));
-      message = "테스트용 데이터를 설정중입니다. $i/$testDataCount";
+      list.add(makePerson(i));
     }
 
-    message = "테스트용 데이터설정을 완료하였습니다.";
+    return list;
   }
 }

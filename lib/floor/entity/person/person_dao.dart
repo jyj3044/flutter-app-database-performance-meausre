@@ -9,6 +9,12 @@ abstract class PersonDao {
   @delete
   Future<void> deleteData(FloorPerson person);
 
+  @update
+  Future<void> updateData(FloorPerson person);
+
+  @update
+  Future<void> updateDataList(List<FloorPerson> person);
+
   @Query('DELETE FROM FloorPerson')
   Future<void> deleteAllData();
 
@@ -16,5 +22,5 @@ abstract class PersonDao {
   Future<List<FloorPerson>> findAll();
 
   @Query('SELECT * FROM FloorPerson WHERE id = :id')
-  Stream<FloorPerson?> findByPrimaryKey(int id);
+  Future<FloorPerson?> findByPrimaryKey(int id);
 }

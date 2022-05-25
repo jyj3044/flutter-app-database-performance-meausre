@@ -98,7 +98,7 @@ class _$AppDatabase extends AppDatabase {
 
 class _$PersonDao extends PersonDao {
   _$PersonDao(this.database, this.changeListener)
-      : _queryAdapter = QueryAdapter(database, changeListener),
+      : _queryAdapter = QueryAdapter(database),
         _floorPersonInsertionAdapter = InsertionAdapter(
             database,
             'FloorPerson',
@@ -117,8 +117,27 @@ class _$PersonDao extends PersonDao {
                   'testField3': item.testField3,
                   'testField4': item.testField4,
                   'testField5': item.testField5
-                },
-            changeListener),
+                }),
+        _floorPersonUpdateAdapter = UpdateAdapter(
+            database,
+            'FloorPerson',
+            ['id'],
+            (FloorPerson item) => <String, Object?>{
+                  'id': item.id,
+                  'age': item.age,
+                  'salary': item.salary,
+                  'isFemale': item.isFemale ? 1 : 0,
+                  'maritalStatus': item.maritalStatus ? 1 : 0,
+                  'name': item.name,
+                  'nickName': item.nickName,
+                  'job': item.job,
+                  'nationality': item.nationality,
+                  'testField1': item.testField1,
+                  'testField2': item.testField2,
+                  'testField3': item.testField3,
+                  'testField4': item.testField4,
+                  'testField5': item.testField5
+                }),
         _floorPersonDeletionAdapter = DeletionAdapter(
             database,
             'FloorPerson',
@@ -138,8 +157,7 @@ class _$PersonDao extends PersonDao {
                   'testField3': item.testField3,
                   'testField4': item.testField4,
                   'testField5': item.testField5
-                },
-            changeListener);
+                });
 
   final sqflite.DatabaseExecutor database;
 
@@ -148,6 +166,8 @@ class _$PersonDao extends PersonDao {
   final QueryAdapter _queryAdapter;
 
   final InsertionAdapter<FloorPerson> _floorPersonInsertionAdapter;
+
+  final UpdateAdapter<FloorPerson> _floorPersonUpdateAdapter;
 
   final DeletionAdapter<FloorPerson> _floorPersonDeletionAdapter;
 
@@ -176,8 +196,8 @@ class _$PersonDao extends PersonDao {
   }
 
   @override
-  Stream<FloorPerson?> findByPrimaryKey(int id) {
-    return _queryAdapter.queryStream('SELECT * FROM FloorPerson WHERE id = ?1',
+  Future<FloorPerson?> findByPrimaryKey(int id) async {
+    return _queryAdapter.query('SELECT * FROM FloorPerson WHERE id = ?1',
         mapper: (Map<String, Object?> row) => FloorPerson(row['id'] as int,
             age: row['age'] as int,
             salary: row['salary'] as int,
@@ -192,14 +212,23 @@ class _$PersonDao extends PersonDao {
             testField3: row['testField3'] as String,
             testField4: row['testField4'] as String,
             testField5: row['testField5'] as String),
-        arguments: [id],
-        queryableName: 'FloorPerson',
-        isView: false);
+        arguments: [id]);
   }
 
   @override
   Future<void> insertData(FloorPerson person) async {
     await _floorPersonInsertionAdapter.insert(person, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> updateData(FloorPerson person) async {
+    await _floorPersonUpdateAdapter.update(person, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> updateDataList(List<FloorPerson> person) async {
+    await _floorPersonUpdateAdapter.updateList(
+        person, OnConflictStrategy.abort);
   }
 
   @override
