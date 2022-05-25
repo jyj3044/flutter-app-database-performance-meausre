@@ -1,22 +1,22 @@
 // ignore_for_file: avoid_print
 
 import 'package:database_performance_measure/entity/person.dart';
-import 'package:database_performance_measure/floor/entity/person/floor_person.dart';
-import 'package:database_performance_measure/floor/entity/person/person_dao.dart';
-import 'package:database_performance_measure/floor/floor_database.dart';
+import 'package:database_performance_measure/hive/entity/hive_person.dart';
 import 'package:database_performance_measure/main.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-const databaseName = "floor.database";
+const _title = "Hive";
+const _boxName = "person_box";
 
-class FloorPage extends StatefulWidget {
-  const FloorPage({Key? key}) : super(key: key);
+class HivePage extends StatefulWidget {
+  const HivePage({Key? key}) : super(key: key);
 
   @override
-  State<FloorPage> createState() => _FloorPageState();
+  State<HivePage> createState() => _HivePageState();
 }
 
-class _FloorPageState extends State<FloorPage> {
+class _HivePageState extends State<HivePage> {
   String statusMessage = "";
   int insertTime = -1;
   int findAllTime = -1;
@@ -36,7 +36,7 @@ class _FloorPageState extends State<FloorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Floor Database"),
+        title: const Text("$_title Database"),
       ),
       body: SafeArea(
         child: Column(
@@ -102,27 +102,34 @@ class _FloorPageState extends State<FloorPage> {
   }
 
   void initDatabase() async {
-    final database = await $FloorAppDatabase.databaseBuilder(databaseName).build();
-    final personDao = database.personDao;
-    await personDao.deleteAllData();
+    await Hive.initFlutter();
+
+    if (!Hive.isAdapterRegistered(HivePersonAdapter().typeId)) {
+      Hive.registerAdapter(HivePersonAdapter());
+    }
+
+    var box = await Hive.openBox<HivePerson>(_boxName);
+    box.clear();
+
+    // box.deleteFromDisk();
 
     /// 데이터 넣기
-    await insertData(personDao);
+    await insertData(box);
 
     /// 전체 데이터 찾기
-    final dataList = await findAllData(personDao);
+    final dataList = await findAllData(box);
 
     /// 데이터 한개찾기
-    final data = await findByIdData(personDao);
+    final data = await findByIdData(box);
 
     /// 데이터 한개 수정하기
-    await updateData(personDao, data!);
+    await updateData(box, data!);
 
     /// 데이터 리스트 수정하기
-    await updateListData(personDao, dataList);
+    await updateListData(box, dataList);
 
     /// 데이터 전체 지우기
-    await deleteAllData(personDao);
+    await deleteAllData(box);
 
     if (!mounted) return;
     setState(() {
@@ -132,117 +139,118 @@ class _FloorPageState extends State<FloorPage> {
     });
   }
 
-  insertData(PersonDao personDao) async {
+  insertData(Box<HivePerson> box) async {
     if (!mounted) return;
 
     setState(() {
-      print("Floor 데이터 넣기 시작");
+      print("Hive 데이터 넣기 시작");
       statusMessage = "데이터 넣는중...";
     });
 
     final stopwatch = Stopwatch()..start();
     for (Person person in testDataList) {
-      await personDao.insertData(makeFloorPerson(person));
+      box.add(makeHivePerson(person));
     }
     if (!mounted) return;
 
     setState(() {
       insertTime = stopwatch.elapsed.inMilliseconds;
-      print("Floor 데이터 넣기 종료");
+      print("Hive 데이터 넣기 종료");
     });
   }
 
-  Future<List<FloorPerson>> findAllData(PersonDao personDao) async {
+  Future<List<HivePerson>> findAllData(Box<HivePerson> box) async {
     if (!mounted) return [];
 
     setState(() {
-      print("Floor 데이터 전체 찾기 시작");
+      print("$_title 데이터 전체 찾기 시작");
       statusMessage = "데이터 전체 찾는중...";
     });
 
     final stopwatch = Stopwatch()..start();
-    final allData = await personDao.findAll();
+    final allData = box.values.toList();
     if (!mounted) return [];
 
     setState(() {
       findAllTime = stopwatch.elapsed.inMilliseconds;
-      print("Floor 전체 데이터 가져오기 완료. ${allData.length}");
+      print("$_title 전체 데이터 가져오기 완료. ${allData.length}");
     });
 
     return allData;
   }
 
-  Future<FloorPerson?> findByIdData(PersonDao personDao) async {
+  Future<HivePerson?> findByIdData(Box<HivePerson> box) async {
     if (!mounted) return null;
 
     setState(() {
-      print("Floor 데이터 찾기 시작");
+      print("$_title 데이터 찾기 시작");
       statusMessage = "데이터 1개 찾는중...";
     });
 
     final stopwatch = Stopwatch()..start();
-    final data = await personDao.findByPrimaryKey(testDataList.length ~/ 2);
+    final data = box.getAt(testDataList.length ~/ 2);
     if (!mounted) return null;
 
     setState(() {
       findByIdTime = stopwatch.elapsed.inMilliseconds;
-      print("Floor 데이터 가져오기 완료. ${data.toString()}");
+      print("$_title 데이터 가져오기 완료. ${data.toString()}");
     });
 
     return data;
   }
 
-  updateData(PersonDao personDao, FloorPerson data) async {
+  updateData(Box<HivePerson> box, HivePerson data) async {
     if (!mounted) return;
 
     setState(() {
-      print("Floor 데이터 수정 시작");
+      print("$_title 데이터 수정 시작");
       statusMessage = "데이터 1개 수정중...";
     });
 
     final stopwatch = Stopwatch()..start();
-    await personDao.updateData(data);
+    HivePerson copyHivePerson = data.copyHivePerson(nickName: "닉네임 수정");
+    box.putAt(testDataList.length ~/ 2, copyHivePerson);
     if (!mounted) return;
 
     setState(() {
       updateTime = stopwatch.elapsed.inMilliseconds;
-      print("Floor 데이터 수정 완료. ${data.toString()}");
+      print("$_title 데이터 수정 완료. ${copyHivePerson.toString()}");
     });
   }
 
-  updateListData(PersonDao personDao, List<FloorPerson> dataList) async {
+  updateListData(Box<HivePerson> box, List<HivePerson> dataList) async {
     if (!mounted) return;
 
     setState(() {
-      print("Floor 데이터 리스트 수정 시작");
+      print("$_title 데이터 리스트 수정 시작");
       statusMessage = "데이터 리스트 수정중...";
     });
 
     final stopwatch = Stopwatch()..start();
-    await personDao.updateDataList(dataList);
+    box.putAll(dataList.asMap());
     if (!mounted) return;
 
     setState(() {
       updateListTime = stopwatch.elapsed.inMilliseconds;
-      print("Floor 데이터리스트 수정 완료.");
+      print("$_title 데이터리스트 수정 완료.");
     });
   }
 
-  deleteAllData(PersonDao personDao) async {
+  deleteAllData(Box<HivePerson> box) async {
     if (!mounted) return;
 
     setState(() {
-      print("Floor 데이터 삭제 시작");
+      print("$_title 데이터 삭제 시작");
       statusMessage = "데이터 전체 삭제중...";
     });
 
     final stopwatch = Stopwatch()..start();
-    await personDao.deleteAllData();
+    box.clear();
     if (!mounted) return;
 
     setState(() {
       deleteAllTime = stopwatch.elapsed.inMilliseconds;
-      print("Floor 데이터 전체 삭제 완료.");
+      print("$_title 데이터 전체 삭제 완료.");
     });
   }
 }

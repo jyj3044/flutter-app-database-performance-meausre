@@ -1,8 +1,10 @@
 import 'package:database_performance_measure/entity/person.dart';
 import 'package:database_performance_measure/floor/floor_page.dart';
+import 'package:database_performance_measure/hive/hive_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,6 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      builder: EasyLoading.init(),
       home: const MyHomePage(title: 'Database Performance Measure'),
     );
   }
@@ -37,6 +40,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String message = "";
+  bool isInit = false;
 
   @override
   void initState() {
@@ -58,8 +62,28 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              message,
+            child: Row(
+              children: [
+                Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 20,
+                  ),
+                ),
+                Visibility(
+                  visible: !isInit,
+                  child: const Padding(
+                    padding: EdgeInsets.only(left: 5),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                      ),
+                    ),
+                  ),
+                )
+              ],
             ),
           ),
           Center(
@@ -79,6 +103,19 @@ class _MyHomePageState extends State<MyHomePage> {
                     );
                   },
                 ),
+                getItemWidget(
+                  Colors.deepOrangeAccent,
+                  Colors.black87,
+                  "Hive",
+                  () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => const HivePage(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -90,7 +127,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget getItemWidget(
       Color backgroundColor, Color fontColor, String title, GestureTapCallback onTap) {
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        if (!isInit) {
+          EasyLoading.showToast("데이터설정중입니다.");
+          return;
+        }
+
+        onTap.call();
+      },
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 10),
         title: Text(
@@ -115,6 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final list = await compute(makeData, 10000);
     testDataList.addAll(list);
 
+    isInit = true;
     setState(() {
       message = "테스트용 데이터를 설정완료.";
     });
